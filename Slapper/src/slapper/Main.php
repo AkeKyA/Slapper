@@ -16,9 +16,9 @@ use pocketmine\event\Listener;
 use pocketmine\Item\Item;
 
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
@@ -212,7 +212,7 @@ class Main extends PluginBase implements Listener
                                     if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
                                         $count++;
                                         if (!(isset($entity->namedtag->Commands))) {
-                                            $entity->namedtag->Commands = new CompoundTag("Commands", []);
+                                            $entity->namedtag->Commands = new Compound("Commands", []);
                                         }
                                         $oldCmds = $this->getConfig()->get($entity->getName());
                                         if ($oldCmds) {
@@ -222,7 +222,7 @@ class Main extends PluginBase implements Listener
                                         }
                                     }
                                     if ($entity instanceof SlapperHuman) {
-                                        if ($entity->getSkinId() === "") {
+                                        if ($entity->getSkinName() === "") {
                                             $entity->setSkin($entity->getSkinData(), "Standard_Custom");
                                             $entity->despawnFromAll();
                                             $entity->spawnToAll();
@@ -367,7 +367,7 @@ class Main extends PluginBase implements Listener
                                                     case "editskin";
                                                     case "skin":
                                                         if ($entity instanceof SlapperHuman) {
-                                                            $entity->setSkin($sender->getSkinData(), $sender->getSkinId());
+                                                            $entity->setSkin($sender->getSkinData(), $sender->getSkinName());
                                                             $entity->respawnToAll();
                                                             $sender->sendMessage($this->prefix . "Skin updated.");
                                                         } else {
@@ -701,7 +701,7 @@ class Main extends PluginBase implements Listener
                                     break;
                             }
                             if ($typeToUse !== "Nothing" && $theOne !== "Blank") {
-                                $nbt = $this->makeNBT($typeToUse, $sender->getSkinData(), $sender->getSkinId(), $name, $inventory, $sender->getYaw(), $sender->getPitch(), $playerX, $playerY, $playerZ);
+                                $nbt = $this->makeNBT($typeToUse, $sender->getSkinData(), $sender->getSkinName(), $name, $inventory, $sender->getYaw(), $sender->getPitch(), $playerX, $playerY, $playerZ);
                                 $slapperEntity = Entity::createEntity($typeToUse, $sender->getLevel()->getChunk($playerX >> 4, $playerZ >> 4), $nbt);
                                 $sender->sendMessage($this->prefix . $theOne . " entity spawned with name " . TextFormat::WHITE . "\"" . TextFormat::BLUE . $name . TextFormat::WHITE . "\"" . TextFormat::GREEN . " and entity ID " . TextFormat::BLUE . $slapperEntity->getId());
                             }
@@ -738,26 +738,26 @@ class Main extends PluginBase implements Listener
 
     private function makeNBT($type, $skin, $skinId, $name, $inv, $yaw, $pitch, $x, $y, $z)
     {
-        $nbt = new CompoundTag;
-        $nbt->Pos = new ListTag("Pos", [
+        $nbt = new Compound;
+        $nbt->Pos = new Enum("Pos", [
             new DoubleTag("", $x),
             new DoubleTag("", $y),
             new DoubleTag("", $z)
         ]);
-        $nbt->Rotation = new ListTag("Rotation", [
+        $nbt->Rotation = new Enum("Rotation", [
             new FloatTag("", $yaw),
             new FloatTag("", $pitch)
         ]);
         $nbt->Health = new ShortTag("Health", 1);
         $nbt->CustomName = new StringTag("CustomName", $name);
-        $nbt->Commands = new CompoundTag("Commands", []);
+        $nbt->Commands = new Compound("Commands", []);
         $nbt->MenuName = new StringTag("MenuName", "");
         $nbt->SlapperVersion = new StringTag("SlapperVersion", "1.2.9.6");
         $nbt->CustomNameVisible = new ByteTag("CustomNameVisible", 1);
         switch($type) {
             case "SlapperHuman":
-                $nbt->Inventory = new ListTag("Inventory", $inv);
-                $nbt->Skin = new CompoundTag("Skin", ["Data" => new StringTag("Data", $skin), "Name" => new StringTag("Name", $skinId)]);
+                $nbt->Inventory = new Enum("Inventory", $inv);
+                $nbt->Skin = new Compound("Skin", ["Data" => new StringTag("Data", $skin), "Name" => new StringTag("Name", $skinId)]);
                 break;
             case "SlapperFallingSand":
                 $nbt->BlockID = new IntTag("BlockID", 1);
@@ -805,7 +805,7 @@ class Main extends PluginBase implements Listener
                             }
                         } else {
                             $this->getLogger()->warning("Outdated entity; adding blank commands compound. Please restore commands manually with '/slapper edit " . $taker->getId() . " fix'");
-                            $taker->namedtag->Commands = new CompoundTag("Commands", []);
+                            $taker->namedtag->Commands = new Compound("Commands", []);
                         }
                     }
 

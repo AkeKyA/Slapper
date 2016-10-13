@@ -10,8 +10,8 @@ class SlapperHuman extends Human {
 
     public function spawnTo(Player $player)
     {
-        if ($player !== $this and !isset($this->hasSpawned[$player->getLoaderId()])) {
-            $this->hasSpawned[$player->getLoaderId()] = $player;
+        if ($player !== $this and !isset($this->hasSpawned[$player->getId()])) {
+            $this->hasSpawned[$player->getId()] = $player;
 
             $uuid = $this->getUniqueId();
             $entityId = $this->getId();
@@ -39,7 +39,7 @@ class SlapperHuman extends Human {
 
             $add = new PlayerListPacket();
             $add->type = 0;
-            $add->entries[] = [$uuid, $entityId, isset($this->namedtag->MenuName) ? $this->namedtag["MenuName"] : "", $this->skinId, $this->skin];
+            $add->entries[] = [$uuid, $entityId, isset($this->namedtag->MenuName) ? $this->namedtag["MenuName"] : "", $this->skinName, $this->skin];
             $player->dataPacket($add);
             if ($this->namedtag["MenuName"] === "") {
                 $remove = new PlayerListPacket();
